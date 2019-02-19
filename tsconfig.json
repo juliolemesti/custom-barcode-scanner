@@ -1,0 +1,30 @@
+{
+  "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
+    "noUnusedLocals": true,
+    "module": "umd",
+    "target": "es5",
+    "experimentalDecorators": true,
+    "skipLibCheck": true,
+    "sourceMap": true,
+    "declaration": true,
+    "removeComments": true,
+    "outDir": "dist/umd",
+    "moduleResolution": "node",
+    "lib": [
+      "es2015",
+      "dom"
+    ]
+  },
+  "include": [
+    "src/ionic/custom-barcode-scanner.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ],
+  "angularCompilerOptions": {
+    "strictMetadataEmit": false,
+    "skipTemplateCodegen": true,
+    "debug": false
+  }
+}

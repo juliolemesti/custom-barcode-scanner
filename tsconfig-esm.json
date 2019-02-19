@@ -1,0 +1,26 @@
+{
+  "extends": "./tsconfig",
+  "compilerOptions": {
+    "module": "es2015",
+    "target": "es5",
+    "experimentalDecorators": true,
+    "skipLibCheck": true,
+    "sourceMap": true,
+    "declaration": true,
+    "removeComments": true,
+    "outDir": "dist/esm",
+    "moduleResolution": "node",
+    "lib": [
+      "es2015",
+      "dom"
+    ]
+  },
+  "include": [
+    "src/ionic/custom-barcode-scanner.ts"
+  ],
+  "angularCompilerOptions": {
+    "strictMetadataEmit": false,
+    "skipTemplateCodegen": true,
+    "debug": false
+  }
+}

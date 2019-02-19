@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" id="cordova-plugin-custom-scanner" version="1.0.0">
+  <name>Cordova Plugin Custom Barcode Scanner</name>
+  <description></description>
+  <license>MIT</license>
+  <keywords></keywords>
+  <repo>https://github.com/mbamobi/cordova-plugin-custom-scanner.git</repo>
+  <issue>https://github.com/mbamobi/cordova-plugin-custom-scanner/issues</issue>
+
+  <js-module src="www/CustomBarcodeScanner.js" name="CustomBarcodeScanner">
+    <runs/>
+    <clobbers target="CustomBarcodeScanner" />
+  </js-module>
+
+  <!-- android -->
+  <platform name="android">
+
+    <config-file target="res/xml/config.xml" parent="/*">
+      <feature name="CustomBarcodeScanner">
+        <param name="android-package" value="br.com.mbamobi.CustomBarcodeScanner" />
+        <param name="onload" value="true" />
+      </feature>
+    </config-file>
+
+    <config-file target="AndroidManifest.xml" parent="/manifest/application">
+      <activity android:name="br.com.mbamobi.AnyOrientationActivity" android:screenOrientation="portrait" android:stateNotNeeded="true" android:theme="@style/zxing_CaptureTheme" android:windowSoftInputMode="stateAlwaysHidden"></activity>
+    </config-file>
+
+    <config-file parent="/*" target="AndroidManifest.xml">
+      <uses-permission android:name="android.permission.CAMERA" />
+    </config-file>
+
+    <source-file src="src/android/CustomBarcodeScanner.java" target-dir="src/br/com/mbamobi/" />
+    <source-file src="src/android/AnyOrientationActivity.java" target-dir="src/br/com/mbamobi/" />
+
+    <framework src="src/android/custom-barcode-scanner.gradle" custom="true" type="gradleReference" />
+  </platform>
+
+  <!-- ios -->
+  <platform name="ios">
+    <dependency id="cordova-plugin-add-swift-support" version="~1.7.1"/>
+
+    <config-file target="config.xml" parent="/*">
+      <feature name="CustomBarcodeScanner">
+        <param name="ios-package" value="CustomBarcodeScanner" />
+      </feature>
+    </config-file>
+
+    <!-- Usage description of Camera for iOS 11+ -->
+    <preference name="CAMERA_USAGE_DESCRIPTION" default=" " />
+    <config-file target="*-Info.plist" parent="NSCameraUsageDescription">
+      <string>$CAMERA_USAGE_DESCRIPTION</string>
+    </config-file>
+
+    <source-file src="src/ios/CustomBarcodeScanner.swift" />
+  </platform>
+</plugin>
