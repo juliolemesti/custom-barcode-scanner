@@ -16,12 +16,12 @@ import com.journeyapps.barcodescanner.BarcodeView;
 import com.journeyapps.barcodescanner.CaptureManager;
 import com.journeyapps.barcodescanner.DecoratedBarcodeView;
 import com.journeyapps.barcodescanner.Size;
-import com.journeyapps.barcodescanner.camera.CameraManager;
 
 public class AnyOrientationActivity extends Activity implements
         DecoratedBarcodeView.TorchListener {
 
-    static String EXTRA_TORCH_ON = "torchOn";
+    static String TORCH_ON = "torchOn";
+    static String FORMATS = "formats";
 
     private CaptureManager capture;
     private DecoratedBarcodeView barcodeScannerView;
@@ -50,7 +50,7 @@ public class AnyOrientationActivity extends Activity implements
             switchFlashlightButton = findViewById(switchFlashlightButtonId);
             switchFlashlightButton.getBackground().setAlpha(100);
 
-            if (getIntent().getBooleanExtra(EXTRA_TORCH_ON, false)) {
+            if (getIntent().getBooleanExtra(TORCH_ON, false)) {
                 barcodeScannerView.setTorchOn();
             }
         } else {

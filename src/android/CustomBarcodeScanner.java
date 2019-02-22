@@ -14,6 +14,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+
 public class CustomBarcodeScanner extends CordovaPlugin {
 
     private CallbackContext callbackContext;
@@ -30,26 +36,33 @@ public class CustomBarcodeScanner extends CordovaPlugin {
         this.callbackContext = callbackContext;
 
         JSONObject options = args.optJSONObject(0);
-        if (action.equals("scanQRCode")) {
-            this.scanCode(new String[]{IntentIntegrator.QR_CODE}, options);
-        } else if (action.equals("scanBarcode")) {
-            String[] formats = {IntentIntegrator.EAN_8, IntentIntegrator.EAN_13, IntentIntegrator.ITF};
-            this.scanCode(formats, options);
+        if (action.equals("scan")) {
+            this.scanCode(options);
         }
 
         return true;
     }
 
-    private void scanCode(String[] formats, JSONObject options) {
+    private void scanCode(JSONObject options) throws JSONException {
 
         this.cordova.setActivityResultCallback(this);
+
+        List<String> formats = Collections.singletonList(IntentIntegrator.QR_CODE);
+
+        if (options.has(AnyOrientationActivity.FORMATS)) {
+            JSONArray jsonArray = options.optJSONArray(AnyOrientationActivity.FORMATS);
+            formats = new ArrayList<String>();
+            for (int i = 0; i < jsonArray.length(); i++) {
+                formats.add(jsonArray.getString(i));
+            }
+        }
 
         IntentIntegrator integrator = new IntentIntegrator(this.cordova.getActivity());
         integrator.setDesiredBarcodeFormats(formats);
         integrator.setBeepEnabled(false);
         integrator.setCaptureActivity(AnyOrientationActivity.class);
         integrator.setPrompt("Alinhe o código para a leitura.");
-        integrator.addExtra(AnyOrientationActivity.EXTRA_TORCH_ON, options.optBoolean(AnyOrientationActivity.EXTRA_TORCH_ON, false));
+        integrator.addExtra(AnyOrientationActivity.TORCH_ON, options.optBoolean(AnyOrientationActivity.TORCH_ON, false));
 
         integrator.initiateScan();
 

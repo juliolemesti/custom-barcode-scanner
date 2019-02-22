@@ -35,8 +35,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
         function CustomBarcodeScanner() {
             return _super !== null && _super.apply(this, arguments) || this;
         }
-        CustomBarcodeScanner.prototype.scanQRcode = function (options) { return; };
-        CustomBarcodeScanner.prototype.scanBarcode = function (options) { return; };
+        CustomBarcodeScanner.prototype.scan = function (options) { return; };
         CustomBarcodeScanner.decorators = [
             { type: core_1.Injectable },
         ];
@@ -46,13 +45,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
             __metadata("design:type", Function),
             __metadata("design:paramtypes", [Object]),
             __metadata("design:returntype", Promise)
-        ], CustomBarcodeScanner.prototype, "scanQRcode", null);
-        __decorate([
-            core_2.Cordova(),
-            __metadata("design:type", Function),
-            __metadata("design:paramtypes", [Object]),
-            __metadata("design:returntype", Promise)
-        ], CustomBarcodeScanner.prototype, "scanBarcode", null);
+        ], CustomBarcodeScanner.prototype, "scan", null);
         CustomBarcodeScanner = __decorate([
             core_2.Plugin({
                 pluginName: 'CustomBarcodeScanner',

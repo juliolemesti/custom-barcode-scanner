@@ -11,8 +11,7 @@ import { Cordova, IonicNativePlugin, Plugin } from '@ionic-native/core';
 @Injectable()
 export class CustomBarcodeScanner extends IonicNativePlugin {
   
-  @Cordova() scanQRcode(options: ScannerOptions): Promise<string> { return; }
-  @Cordova() scanBarcode(options: ScannerOptions): Promise<any> { return; }
+  @Cordova() scan(options: ScannerOptions): Promise<string> { return; }
   
 }
 
