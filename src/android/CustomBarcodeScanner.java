@@ -29,20 +29,21 @@ public class CustomBarcodeScanner extends CordovaPlugin {
         this.callbackContext = callbackContext;
 
         if (action.equals("scanQRCode")) {
-            this.scanCode("QR_CODE");
+            this.scanCode(new String[]{IntentIntegrator.QR_CODE});
         } else if (action.equals("scanBarcode")) {
-            this.scanCode("ITF");
+            String[] formats = {IntentIntegrator.EAN_8, IntentIntegrator.EAN_13, IntentIntegrator.ITF};
+            this.scanCode(formats);
         }
 
         return true;
     }
 
-    private void scanCode(String format) {
+    private void scanCode(String[] formats) {
 
         this.cordova.setActivityResultCallback(this);
 
         IntentIntegrator integrator = new IntentIntegrator(this.cordova.getActivity());
-        integrator.setDesiredBarcodeFormats(format);
+        integrator.setDesiredBarcodeFormats(formats);
         integrator.setBeepEnabled(false);
         integrator.setCaptureActivity(AnyOrientationActivity.class);
         integrator.setPrompt("Alinhe o código para a leitura.");
