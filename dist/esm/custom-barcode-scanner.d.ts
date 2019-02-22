@@ -1,5 +1,8 @@
 import { IonicNativePlugin } from '@ionic-native/core';
 export declare class CustomBarcodeScanner extends IonicNativePlugin {
-    scanQRcode(): Promise<string>;
-    scanBarcode(): Promise<any>;
+    scanQRcode(options: ScannerOptions): Promise<string>;
+    scanBarcode(options: ScannerOptions): Promise<any>;
+}
+export interface ScannerOptions {
+    torchOn: boolean;
 }

@@ -24,8 +24,8 @@ var CustomBarcodeScanner = (function (_super) {
     function CustomBarcodeScanner() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
-    CustomBarcodeScanner.prototype.scanQRcode = function () { return; };
-    CustomBarcodeScanner.prototype.scanBarcode = function () { return; };
+    CustomBarcodeScanner.prototype.scanQRcode = function (options) { return; };
+    CustomBarcodeScanner.prototype.scanBarcode = function (options) { return; };
     CustomBarcodeScanner.decorators = [
         { type: Injectable },
     ];
@@ -33,13 +33,13 @@ var CustomBarcodeScanner = (function (_super) {
     __decorate([
         Cordova(),
         __metadata("design:type", Function),
-        __metadata("design:paramtypes", []),
+        __metadata("design:paramtypes", [Object]),
         __metadata("design:returntype", Promise)
     ], CustomBarcodeScanner.prototype, "scanQRcode", null);
     __decorate([
         Cordova(),
         __metadata("design:type", Function),
-        __metadata("design:paramtypes", []),
+        __metadata("design:paramtypes", [Object]),
         __metadata("design:returntype", Promise)
     ], CustomBarcodeScanner.prototype, "scanBarcode", null);
     CustomBarcodeScanner = __decorate([

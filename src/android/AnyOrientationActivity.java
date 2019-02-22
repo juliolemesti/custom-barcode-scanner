@@ -21,8 +21,9 @@ import com.journeyapps.barcodescanner.camera.CameraManager;
 public class AnyOrientationActivity extends Activity implements
         DecoratedBarcodeView.TorchListener {
 
+    static String EXTRA_TORCH_ON = "torchOn";
+
     private CaptureManager capture;
-    private CameraManager cameraManager;
     private DecoratedBarcodeView barcodeScannerView;
     private boolean isTorchOn = false;
     private Button switchFlashlightButton;
@@ -34,15 +35,28 @@ public class AnyOrientationActivity extends Activity implements
         barcodeScannerView = initializeContent();
         barcodeScannerView.setTorchListener(this);
 
-        int switchFlashlightButtonId = getResourceIdentifier("switch_flashlight", "id");
-        switchFlashlightButton = findViewById(switchFlashlightButtonId);
-        switchFlashlightButton.getBackground().setAlpha(100);
-
-        cameraManager = new CameraManager(getApplication().getApplicationContext());
+        setTorchButton();
 
         capture = new CaptureManager(this, barcodeScannerView);
         capture.initializeFromIntent(getIntent(), savedInstanceState);
         capture.decode();
+
+
+    }
+
+    private void setTorchButton() {
+        if (hasFlash()) {
+            int switchFlashlightButtonId = getResourceIdentifier("switch_flashlight", "id");
+            switchFlashlightButton = findViewById(switchFlashlightButtonId);
+            switchFlashlightButton.getBackground().setAlpha(100);
+
+            if (getIntent().getBooleanExtra(EXTRA_TORCH_ON, false)) {
+                barcodeScannerView.setTorchOn();
+            }
+        } else {
+            switchFlashlightButton.setVisibility(View.GONE);
+        }
+
     }
 
     /**
@@ -132,7 +146,7 @@ public class AnyOrientationActivity extends Activity implements
         isTorchOn = true;
         switchFlashlightButton.getBackground().setAlpha(255);
         AlphaAnimation alphaAnim = new AlphaAnimation(0.4f, 1.0f);
-        alphaAnim.setDuration (200);
+        alphaAnim.setDuration(200);
         switchFlashlightButton.startAnimation(alphaAnim);
     }
 
@@ -141,7 +155,7 @@ public class AnyOrientationActivity extends Activity implements
         isTorchOn = false;
         switchFlashlightButton.getBackground().setAlpha(100);
         AlphaAnimation alphaAnim = new AlphaAnimation(1.0f, 0.4f);
-        alphaAnim.setDuration (200);
+        alphaAnim.setDuration(200);
         switchFlashlightButton.startAnimation(alphaAnim);
     }
 }

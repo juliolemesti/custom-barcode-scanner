@@ -12,6 +12,7 @@ import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.CordovaWebView;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 public class CustomBarcodeScanner extends CordovaPlugin {
 
@@ -28,17 +29,18 @@ public class CustomBarcodeScanner extends CordovaPlugin {
     public boolean execute(String action, JSONArray args, final CallbackContext callbackContext) throws JSONException {
         this.callbackContext = callbackContext;
 
+        JSONObject options = args.optJSONObject(0);
         if (action.equals("scanQRCode")) {
-            this.scanCode(new String[]{IntentIntegrator.QR_CODE});
+            this.scanCode(new String[]{IntentIntegrator.QR_CODE}, options);
         } else if (action.equals("scanBarcode")) {
             String[] formats = {IntentIntegrator.EAN_8, IntentIntegrator.EAN_13, IntentIntegrator.ITF};
-            this.scanCode(formats);
+            this.scanCode(formats, options);
         }
 
         return true;
     }
 
-    private void scanCode(String[] formats) {
+    private void scanCode(String[] formats, JSONObject options) {
 
         this.cordova.setActivityResultCallback(this);
 
@@ -47,6 +49,7 @@ public class CustomBarcodeScanner extends CordovaPlugin {
         integrator.setBeepEnabled(false);
         integrator.setCaptureActivity(AnyOrientationActivity.class);
         integrator.setPrompt("Alinhe o código para a leitura.");
+        integrator.addExtra(AnyOrientationActivity.EXTRA_TORCH_ON, options.optBoolean(AnyOrientationActivity.EXTRA_TORCH_ON, false));
 
         integrator.initiateScan();
 

@@ -1,14 +1,13 @@
-
 var exec = require('cordova/exec');
 
 var PLUGIN_NAME = 'CustomBarcodeScanner';
 
 var CustomBarcodeScanner = {
-  scanQRcode: function (successCallback, erroCallback) {
-    exec(successCallback, erroCallback, PLUGIN_NAME, 'scanQRCode', []);
+  scanQRcode: function (options, successCallback, errorCallback) {
+    exec(successCallback, errorCallback, PLUGIN_NAME, 'scanQRCode', [options]);
   },
-  scanBarcode: function (successCallback, erroCallback) {
-    exec(successCallback, erroCallback, PLUGIN_NAME, 'scanBarcode', []);
+  scanBarcode: function (options, successCallback, errorCallback) {
+    exec(successCallback, errorCallback, PLUGIN_NAME, 'scanBarcode', [options]);
   }
 };
 
