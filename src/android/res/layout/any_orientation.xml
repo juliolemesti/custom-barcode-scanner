@@ -10,8 +10,11 @@
  See the License for the specific language governing permissions and
  limitations under the License.
  -->
-<merge xmlns:android="http://schemas.android.com/apk/res/android"
-       xmlns:app="http://schemas.android.com/apk/res-auto">
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:orientation="horizontal">
 
     <!--
     This Activity is typically full-screen. Therefore we can safely use centerCrop scaling with
@@ -29,12 +32,18 @@
 
     <Button
             android:id="@+id/switch_flashlight"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="true"
-            android:background="@color/custom_barcode_torch_color"
-            android:drawableStart="@drawable/toggle_torch"
+            android:background="@drawable/lightbulb_off"
             android:onClick="switchFlashlight" />
 
-</merge>
+    <Button
+            android:id="@+id/switch_camera"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_alignParentEnd="true"
+            android:background="@drawable/switch_camera"
+            android:onClick="switchCamera" />
+
+</RelativeLayout>

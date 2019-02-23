@@ -4,18 +4,19 @@ import android.app.Activity;
 import android.app.Application;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.hardware.Camera;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.util.DisplayMetrics;
 import android.view.KeyEvent;
 import android.view.View;
-import android.view.animation.AlphaAnimation;
 import android.widget.Button;
 
 import com.journeyapps.barcodescanner.BarcodeView;
 import com.journeyapps.barcodescanner.CaptureManager;
 import com.journeyapps.barcodescanner.DecoratedBarcodeView;
 import com.journeyapps.barcodescanner.Size;
+import com.journeyapps.barcodescanner.camera.CameraManager;
 
 public class AnyOrientationActivity extends Activity implements
         DecoratedBarcodeView.TorchListener {
@@ -23,19 +24,19 @@ public class AnyOrientationActivity extends Activity implements
     static String TORCH_ON = "torchOn";
     static String FORMATS = "formats";
 
-    private CaptureManager capture;
     private DecoratedBarcodeView barcodeScannerView;
+    private CaptureManager capture;
+    private CameraManager cameraManager;
+
     private boolean isTorchOn = false;
     private Button switchFlashlightButton;
+    private Button switchCameraButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        barcodeScannerView = initializeContent();
-        barcodeScannerView.setTorchListener(this);
-
-        setTorchButton();
+        initializeContent();
 
         capture = new CaptureManager(this, barcodeScannerView);
         capture.initializeFromIntent(getIntent(), savedInstanceState);
@@ -44,37 +45,48 @@ public class AnyOrientationActivity extends Activity implements
 
     }
 
-    private void setTorchButton() {
-        if (hasFlash()) {
-            int switchFlashlightButtonId = getResourceIdentifier("switch_flashlight", "id");
-            switchFlashlightButton = findViewById(switchFlashlightButtonId);
-            switchFlashlightButton.getBackground().setAlpha(100);
+    /**
+     * Override to use a different layout.
+     *
+     * @return the DecoratedBarcodeView
+     */
+    protected void initializeContent() {
 
+        int anyOrientationLayout = getResourceIdentifier("any_orientation", "layout");
+        setContentView(anyOrientationLayout);
+
+        int barcodeScannerId = getResourceIdentifier("zxing_barcode_scanner", "id");
+        barcodeScannerView = findViewById(barcodeScannerId);
+
+        setTorchButton();
+        setSwitchCameraButton();
+
+        this.calculateFrameSize(barcodeScannerView);
+    }
+
+
+
+    private void setTorchButton() {
+        barcodeScannerView.setTorchListener(this);
+        this.switchFlashlightButton = findViewById(getResourceIdentifier("switch_flashlight", "id"));
+        if (hasFlash()){
             if (getIntent().getBooleanExtra(TORCH_ON, false)) {
                 barcodeScannerView.setTorchOn();
             }
         } else {
             switchFlashlightButton.setVisibility(View.GONE);
         }
-
     }
 
-    /**
-     * Override to use a different layout.
-     *
-     * @return the DecoratedBarcodeView
-     */
-    protected DecoratedBarcodeView initializeContent() {
+    private void setSwitchCameraButton() {
+        switchCameraButton = findViewById(getResourceIdentifier("switch_camera", "id"));
+        if (!hasFrontalCamera()) switchCameraButton.setVisibility(View.GONE);
+    }
 
-        int anyOrientationLayout = getResourceIdentifier("any_orientation", "layout");
-        setContentView(anyOrientationLayout);
-
-        int barcodeScannerId = getResourceIdentifier("zxing_barcode_scanner", "id");
-        DecoratedBarcodeView decoratedBarcodeView = findViewById(barcodeScannerId);
-
-        this.calculateFrameSize(decoratedBarcodeView);
-
-        return decoratedBarcodeView;
+    public void switchCamera(View view){
+        int reqCamId = getIntent().getIntExtra("SCAN_CAMERA_ID", -1);
+        getIntent().putExtra("SCAN_CAMERA_ID", reqCamId == 1 ? 0 : 1);
+        recreate();
     }
 
     private void calculateFrameSize(DecoratedBarcodeView decoratedBarcodeView) {
@@ -82,7 +94,7 @@ public class AnyOrientationActivity extends Activity implements
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
 
         int width = (int) (displayMetrics.widthPixels * .90);
-        int height = (int) (displayMetrics.heightPixels * .90);
+        int height = (int) (displayMetrics.heightPixels * .85);
         Size size = new Size(width, height);
 
         int barcodeViewId = getResourceIdentifier("zxing_barcode_surface", "id");
@@ -136,6 +148,10 @@ public class AnyOrientationActivity extends Activity implements
         return getApplicationContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH);
     }
 
+    private boolean hasFrontalCamera() {
+        return getApplicationContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH);
+    }
+
     public void switchFlashlight(View view) {
         if (isTorchOn) barcodeScannerView.setTorchOff();
         else barcodeScannerView.setTorchOn();
@@ -144,18 +160,12 @@ public class AnyOrientationActivity extends Activity implements
     @Override
     public void onTorchOn() {
         isTorchOn = true;
-        switchFlashlightButton.getBackground().setAlpha(255);
-        AlphaAnimation alphaAnim = new AlphaAnimation(0.4f, 1.0f);
-        alphaAnim.setDuration(200);
-        switchFlashlightButton.startAnimation(alphaAnim);
+        switchFlashlightButton.setBackgroundResource(getResourceIdentifier("lightbulb_on", "drawable"));
     }
 
     @Override
     public void onTorchOff() {
         isTorchOn = false;
-        switchFlashlightButton.getBackground().setAlpha(100);
-        AlphaAnimation alphaAnim = new AlphaAnimation(1.0f, 0.4f);
-        alphaAnim.setDuration(200);
-        switchFlashlightButton.startAnimation(alphaAnim);
+        switchFlashlightButton.setBackgroundResource(getResourceIdentifier("lightbulb_off", "drawable"));
     }
 }
