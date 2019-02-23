@@ -35,7 +35,9 @@
     <source-file src="src/android/AnyOrientationActivity.java" target-dir="src/br/com/mbamobi/" />
     <source-file src="src/android/res/layout/any_orientation.xml" target-dir="res/layout" />
     <source-file src="src/android/res/values/custom_barcode_scanner_strings.xml" target-dir="res/values" />
-    <source-file src="src/android/res/drawable/toggle_torch.png" target-dir="res/drawable" />
+    <source-file src="src/android/res/drawable/lightbulb_off.png" target-dir="res/drawable" />
+    <source-file src="src/android/res/drawable/lightbulb_on.png" target-dir="res/drawable" />
+    <source-file src="src/android/res/drawable/switch_camera.png" target-dir="res/drawable" />
 
     <framework src="src/android/custom-barcode-scanner.gradle" custom="true" type="gradleReference" />
   </platform>
