@@ -107,7 +107,7 @@ class CustomBarcodeScanner : CDVPlugin, AVCaptureMetadataOutputObjectsDelegate, 
             flashOffImage = UIImage.init(contentsOfFile: flashOffImagePath!)
 
             flashButton = UIButton(frame: CGRect(x: 16, y: view.frame.size.height - 60, width: 50, height: 50))
-            flashButton?.setImage(flashImage, for: .normal)
+            flashButton?.setImage(flashOffImage, for: .normal)
             flashButton?.addTarget(self, action: #selector(flashButtonAction), for: .touchUpInside)
             view.addSubview(flashButton!)
 
