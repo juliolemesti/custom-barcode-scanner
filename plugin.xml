@@ -59,5 +59,6 @@
     </config-file>
 
     <source-file src="src/ios/CustomBarcodeScanner.swift" />
+    <resource-file src="src/ios/CustomBarcodeScanner.bundle"/>
   </platform>
 </plugin>

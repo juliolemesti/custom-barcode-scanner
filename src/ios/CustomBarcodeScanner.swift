@@ -9,24 +9,29 @@ class CustomBarcodeScanner : CDVPlugin, AVCaptureMetadataOutputObjectsDelegate, 
     var qrCodeFrameView: UIView?
     var isBinaryContent: Bool?
     var cancelButton: UIButton?
+    var flashButton: UIButton?
+    var switchCameraButton: UIButton?
 
     var currentCamera: Int = 0;
     var frontCamera: AVCaptureDevice?
     var backCamera: AVCaptureDevice?
 
-    @objc(scanQRCode:)
-    func scanQRCode(command: CDVInvokedUrlCommand) {
-        self.callbackId = command.callbackId;
-        self.doScan();
-    }
+    var options: NSDictionary?
+    var usingFrontCamera: Bool = false;
 
-    @objc(scanBarcode:)
+    var flashImage: UIImage?
+    var flashOffImage: UIImage?
+
+    var previewLayer: AVCaptureVideoPreviewLayer!
+
+    @objc(scan:)
     func scanBarcode(command: CDVInvokedUrlCommand) {
         self.callbackId = command.callbackId;
-        self.doScan(readQRcode: false);
+        self.doScan(options: command.argument(at: 0) as! NSDictionary);
     }
 
-    func doScan(readQRcode: Bool? = true){
+    func doScan(options: NSDictionary){
+        self.options = options
         let view: UIView = self.webView.superview!
 
         let status = AVCaptureDevice.authorizationStatus(for: AVMediaType.video)
@@ -69,7 +74,9 @@ class CustomBarcodeScanner : CDVPlugin, AVCaptureMetadataOutputObjectsDelegate, 
 
             // Set delegate and use the default dispatch queue to execute the call back
             captureMetadataOutput.setMetadataObjectsDelegate(self, queue: DispatchQueue.main)
-            let captureObjectType = readQRcode! ? AVMetadataObject.ObjectType.qr : AVMetadataObject.ObjectType.interleaved2of5
+            let formats: NSArray = options.object(forKey: "formats") as! NSArray
+            let format: NSString = formats.object(at: 0) as! NSString
+            let captureObjectType = format == "QR_CODE" ? AVMetadataObject.ObjectType.qr : AVMetadataObject.ObjectType.interleaved2of5
             captureMetadataOutput.metadataObjectTypes = [captureObjectType]
 
             // Initialize the video preview layer and add it as a sublayer to the viewPreview view's layer.
@@ -81,7 +88,7 @@ class CustomBarcodeScanner : CDVPlugin, AVCaptureMetadataOutputObjectsDelegate, 
             // Start video capture.
             captureSession!.startRunning()
 
-            cancelButton = UIButton(frame: CGRect(x: 16, y: 30, width: 80, height: 30))
+            cancelButton = UIButton(frame: CGRect(x: 16, y: 45, width: 80, height: 30))
             cancelButton?.layer.borderWidth = 1
             cancelButton?.layer.borderColor = UIColor.white.cgColor
             cancelButton?.layer.cornerRadius = CGFloat(14)
@@ -90,15 +97,39 @@ class CustomBarcodeScanner : CDVPlugin, AVCaptureMetadataOutputObjectsDelegate, 
             cancelButton?.addTarget(self, action: #selector(cancelButtonAction), for: .touchUpInside)
             view.addSubview(cancelButton!)
 
+            let bundleUrl = Bundle.main.url(forResource: "CustomBarcodeScanner", withExtension: "bundle")
+            let bundle = Bundle.init(url: bundleUrl!)
+
+            let flashImagePath = bundle?.path(forResource: "lightbulb_on", ofType: "png")
+            flashImage = UIImage.init(contentsOfFile: flashImagePath!)
+
+            let flashOffImagePath = bundle?.path(forResource: "lightbulb_off", ofType: "png")
+            flashOffImage = UIImage.init(contentsOfFile: flashOffImagePath!)
+
+            flashButton = UIButton(frame: CGRect(x: 16, y: view.frame.size.height - 60, width: 50, height: 50))
+            flashButton?.setImage(flashImage, for: .normal)
+            flashButton?.addTarget(self, action: #selector(flashButtonAction), for: .touchUpInside)
+            view.addSubview(flashButton!)
+
+            switchCameraButton = UIButton(frame: CGRect(x: view.frame.size.width - 66, y: view.frame.size.height - 60, width: 50, height: 50))
+            let switchImagePath = bundle?.path(forResource: "switch_camera", ofType: "png")
+            let switchImage = UIImage.init(contentsOfFile: switchImagePath!)
+            switchCameraButton?.setImage(switchImage, for: .normal)
+            switchCameraButton?.addTarget(self, action: #selector(switchCameraButtonAction), for: .touchUpInside)
+            view.addSubview(switchCameraButton!)
+
             // Initialize QR Code Frame to highlight the QR code
             qrCodeFrameView = UIView()
-            if let qrCodeFrameView = qrCodeFrameView {
-                qrCodeFrameView.layer.borderColor = UIColor.green.cgColor
-                qrCodeFrameView.layer.borderWidth = 2
-                view.addSubview(qrCodeFrameView)
-                view.bringSubviewToFront(qrCodeFrameView)
-            }
+            qrCodeFrameView?.layer.borderColor = UIColor.red.cgColor
+            qrCodeFrameView?.layer.borderWidth = 2
+            qrCodeFrameView?.frame = CGRect(x: 30, y: 90, width: view.frame.size.width - 60, height: view.frame.size.height - 160)
+            view.addSubview(qrCodeFrameView!)
+            view.bringSubviewToFront(qrCodeFrameView!)
 
+            let torchOn:Bool = options.object(forKey: "torchOn") as! Bool
+            if (torchOn) {
+                self.turnFlashOn()
+            }
 
         } catch {
             // If any error occurs, simply print it out and don't continue any more.
@@ -132,6 +163,28 @@ class CustomBarcodeScanner : CDVPlugin, AVCaptureMetadataOutputObjectsDelegate, 
         return captureDeviceInput
     }
 
+    func getFrontCamera() -> AVCaptureDevice?{
+        let videoDevices = AVCaptureDevice.devices(for: AVMediaType.video)
+
+        for device in videoDevices{
+            if device.position == AVCaptureDevice.Position.front {
+                return device
+            }
+        }
+        return nil
+    }
+
+    func getBackCamera() -> AVCaptureDevice?{
+        let videoDevices = AVCaptureDevice.devices(for: AVMediaType.video)
+
+        for device in videoDevices{
+            if device.position == AVCaptureDevice.Position.back {
+                return device
+            }
+        }
+        return nil
+    }
+
     func metadataOutput(_ output: AVCaptureMetadataOutput, didOutput metadataObjects: [AVMetadataObject], from connection: AVCaptureConnection) {
         // Check if the metadataObjects array is not nil and it contains at least one object.
         if metadataObjects.count == 0 {
@@ -162,14 +215,71 @@ class CustomBarcodeScanner : CDVPlugin, AVCaptureMetadataOutputObjectsDelegate, 
         self.sendResultSuccess(msg: "")
     }
 
+    @objc(flashButtonAction:)
+    func flashButtonAction(sender: UIButton!) {
+        guard let device = AVCaptureDevice.default(for: AVMediaType.video) else { return }
+        guard device.hasTorch else { return }
+
+        do {
+            try device.lockForConfiguration()
+
+            if (device.torchMode == AVCaptureDevice.TorchMode.on) {
+                device.torchMode = AVCaptureDevice.TorchMode.off
+                flashButton?.setImage(flashOffImage, for: .normal)
+            } else {
+                self.turnFlashOn()
+            }
+
+            device.unlockForConfiguration()
+        } catch {
+            print(error)
+        }
+    }
+
+    @objc(switchCameraButtonAction:)
+    func switchCameraButtonAction(sender: UIButton!) {
+        usingFrontCamera = !usingFrontCamera
+        do{
+            captureSession!.removeInput(captureSession!.inputs.first!)
+
+            if(usingFrontCamera){
+                let captureDevice = getFrontCamera()
+                let captureDeviceInput1 = try AVCaptureDeviceInput(device: captureDevice!)
+                captureSession!.addInput(captureDeviceInput1)
+            }else{
+                let captureDevice = getBackCamera()
+                let captureDeviceInput1 = try AVCaptureDeviceInput(device: captureDevice!)
+                captureSession!.addInput(captureDeviceInput1)
+            }
+        }catch{
+            print(error.localizedDescription)
+        }
+    }
+
+    func turnFlashOn(){
+        guard let device = AVCaptureDevice.default(for: AVMediaType.video) else { return }
+        guard device.hasTorch else { return }
+        do {
+            try device.lockForConfiguration()
+            try device.setTorchModeOn(level: 1.0)
+            flashButton?.setImage(flashImage, for: .normal)
+        } catch {
+            print(error)
+        }
+    }
+
     func stopCapture(){
         if(captureSession != nil) {captureSession!.stopRunning()}
         if(videoPreviewLayer != nil) {videoPreviewLayer!.removeFromSuperlayer()}
         if(cancelButton != nil) {cancelButton!.removeFromSuperview()}
+        if(flashButton != nil) {flashButton!.removeFromSuperview()}
+        if(switchCameraButton != nil) {switchCameraButton!.removeFromSuperview()}
 
         captureSession = nil
         videoPreviewLayer = nil
         cancelButton = nil
+        flashButton = nil
+        switchCameraButton = nil
     }
 
     func sendResultFailure(error: Error? = nil, msg: String = ""){
